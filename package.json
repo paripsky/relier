@@ -4,8 +4,9 @@
   "description": "remote desktop",
   "main": "main.js",
   "scripts": {
-    "start": "electron .",
-    "dev": "cross-env BROWSER=none react-scripts start",
+    "electron": "electron .",
+    "react-dev": "cross-env BROWSER=none react-scripts start",
+    "dev": "concurrently \"npm run react-dev\" \"npm run electron\"",
     "build": "react-scripts build",
     "test": "react-scripts test"
   },
@@ -17,20 +18,30 @@
     "@testing-library/jest-dom": "^4.2.4",
     "@testing-library/react": "^9.4.0",
     "@testing-library/user-event": "^7.1.2",
+    "concurrently": "^5.0.2",
     "cross-env": "^6.0.3",
     "electron": "^7.1.7",
     "eslint-plugin-prettier": "^3.1.2",
-    "node-sass": "^4.13.0",
     "prettier": "^1.19.1"
   },
   "dependencies": {
+    "@chakra-ui/core": "^0.5.2",
+    "@emotion/core": "^10.0.27",
+    "@emotion/styled": "^10.0.27",
+    "@types/jest": "^25.1.1",
+    "@types/node": "^13.5.2",
+    "@types/react": "^16.9.19",
+    "@types/react-dom": "^16.9.5",
+    "@types/react-redux": "^7.1.7",
+    "emotion-theming": "^10.0.27",
     "prop-types": "^15.7.2",
     "react": "^16.12.0",
     "react-dom": "^16.12.0",
     "react-redux": "^7.1.3",
     "react-scripts": "3.3.0",
     "redux": "^4.0.5",
-    "redux-thunk": "^2.3.0"
+    "redux-thunk": "^2.3.0",
+    "typescript": "^3.7.5"
   },
   "eslintConfig": {
     "extends": "react-app"

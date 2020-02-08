@@ -81,7 +81,7 @@ loginBtn.addEventListener('click', function(event) {
   if (name.length > 0) {
     send({
       type: 'login',
-      name: name
+      name: name,
     });
   }
 });
@@ -116,9 +116,9 @@ function handleLogin(success) {
                 minWidth: 1280,
                 maxWidth: 1280,
                 minHeight: 720,
-                maxHeight: 720
-              }
-            }
+                maxHeight: 720,
+              },
+            },
           })
           .then(function(myStream) {
             stream = myStream;
@@ -130,10 +130,10 @@ function handleLogin(success) {
             var configuration = {
               iceServers: [
                 //{ url: 'stun:stun2.1.google.com:19302' }
-              ]
+              ],
             };
 
-            yourConn = new webkitRTCPeerConnection(configuration);
+            yourConn = new RTCPeerConnection(configuration);
 
             // setup stream listening
             yourConn.addStream(stream);
@@ -148,7 +148,7 @@ function handleLogin(success) {
               if (event.candidate) {
                 send({
                   type: 'candidate',
-                  candidate: event.candidate
+                  candidate: event.candidate,
                 });
               }
             };
@@ -169,7 +169,7 @@ callBtn.addEventListener('click', function() {
       function(offer) {
         send({
           type: 'offer',
-          offer: offer
+          offer: offer,
         });
 
         yourConn.setLocalDescription(offer);
@@ -193,7 +193,7 @@ function handleOffer(offer, name) {
 
       send({
         type: 'answer',
-        answer: answer
+        answer: answer,
       });
     },
     function(error) {
@@ -215,7 +215,7 @@ function handleCandidate(candidate) {
 //hang up
 hangUpBtn.addEventListener('click', function() {
   send({
-    type: 'leave'
+    type: 'leave',
   });
 
   handleLeave();

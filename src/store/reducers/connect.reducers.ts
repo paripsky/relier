@@ -1,4 +1,9 @@
-import { START_CONNECTING, CONNECTED } from '../actions/connect.types';
+// @ts-nocheck
+import {
+  START_CONNECTING,
+  CONNECTED,
+  STREAMING,
+} from '../actions/connect.types';
 import { combineReducers } from 'redux';
 
 export const connecting = (state = false, { type, id }) => {
@@ -21,4 +26,13 @@ export const connections = (state = [], { type, id }) => {
   }
 };
 
-export default combineReducers({ connecting, connections });
+export const streamId = (state = null, { type, streamId }) => {
+  switch (type) {
+    case STREAMING:
+      return streamId;
+    default:
+      return state;
+  }
+};
+
+export default combineReducers({ connecting, connections, streamId });

@@ -12,7 +12,7 @@ document.addEventListener('keydown', function(e) {
       .remote.getCurrentWindow()
       .toggleDevTools();
   } else if (e.which === 116) {
-    location.reload();
+    window.location.reload();
   }
 });
 
