@@ -5,13 +5,27 @@ import App from './App';
 import * as serviceWorker from './serviceWorker';
 import store from './store';
 import { Provider as StoreProvider } from 'react-redux';
-import { ThemeProvider, CSSReset, ColorModeProvider } from '@chakra-ui/core';
+import {
+  ThemeProvider,
+  CSSReset,
+  ColorModeProvider,
+  theme as ChakraTheme,
+} from '@chakra-ui/core';
 
 document.title = 'unelap';
 
+const theme = {
+  ...ChakraTheme,
+  fonts: {
+    body: 'Oswald',
+    heading: 'Oswald',
+    mono: 'Oswald',
+  },
+};
+
 ReactDOM.render(
   <StoreProvider store={store}>
-    <ThemeProvider>
+    <ThemeProvider theme={theme}>
       <CSSReset />
       <ColorModeProvider>
         <App />

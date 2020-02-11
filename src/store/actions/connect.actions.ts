@@ -1,71 +1,103 @@
-// @ts-nocheck
-import { CONNECTED, START_CONNECTING, STREAMING } from './connect.types';
+import {
+  CONNECTED,
+  START_CONNECTING,
+  STREAMING,
+  RECIEVING,
+} from './connect.types';
 import {
   connect as connectToSocket,
   call,
   sendMessage,
   SocketMessageTypes,
+  Connection,
 } from '../../connection';
+import { DesktopCapturer } from 'electron';
 import { Dispatch } from 'redux';
 
-export const startConnecting = secret => ({ type: START_CONNECTING, secret });
-export const connected = secret => ({ type: CONNECTED, secret });
-export const streaming = id => ({ type: STREAMING, streamId: id });
+const electron = window.require && window.require('electron');
+const desktopCapturer: DesktopCapturer = electron && electron.desktopCapturer;
 
-const connections = {};
-let myId;
+export const startConnecting = (secret: string) => ({
+  type: START_CONNECTING,
+  secret,
+});
+export const connected = (secret: string) => ({
+  type: CONNECTED,
+  secret,
+});
+export const streaming = (id: string) => ({ type: STREAMING, streamId: id });
+export const recieving = (id: string) => ({ type: RECIEVING, streamId: id });
+
+const connections = new Map<string, Connection>();
+const streams = new Map<string, MediaStream>();
 
 export const hostAction = (secret: string, password: string) => {
   return async (dispatch: Dispatch) => {
     dispatch(startConnecting(secret));
-    const { connection, localConnection } = await connectToSocket(
+    const { connection, localConnection, token } = await connectToSocket(
       'ws://localhost:9000',
-      (stream: MediaStream) => {
-        (window as any)['streams'] = {};
-        (window as any)['streams']['0'] = stream;
-        dispatch(streaming('0'));
-      },
       secret,
-      {
-        onLogin: id => {
-          dispatch(connected(id));
-          myId = id;
-        },
-      }
+      password
     );
 
-    sendMessage(connection, { type: SocketMessageTypes.login, secret });
+    const onMessage = (event: MessageEvent) => {
+      const data = JSON.parse(event.data);
+    };
+    connection.addEventListener('message', onMessage);
+    connections.set(secret, { connection, localConnection, token });
 
-    connections[secret] = { connection, localConnection };
+    dispatch(connected(secret));
   };
 };
 
-export const connectAction = (secret, to) => {
-  return dispatch => {
-    window
-      .require('electron')
-      .desktopCapturer.getSources({ types: [/* 'window', */ 'screen'] })
-      .then(async sources => {
-        const source = sources[0];
-        navigator.mediaDevices
-          .getUserMedia({
-            audio: false,
-            video: {
-              mandatory: {
-                chromeMediaSource: 'desktop',
-                chromeMediaSourceId: source.id,
-                minWidth: 1280,
-                maxWidth: 1280,
-                minHeight: 720,
-                maxHeight: 720,
-              },
-            } as any,
-          })
-          .then(async stream => {
-            const { connection, localConnection } = connections[secret];
-            localConnection.addStream(stream);
-            call(connection, localConnection, secret);
-          });
-      });
+export const connectAction = (secret: string, password: string) => {
+  return async (dispatch: Dispatch) => {
+    dispatch(startConnecting(secret));
+    const { connection, localConnection, token } = await connectToSocket(
+      'ws://localhost:9000',
+      secret,
+      password
+    );
+
+    localConnection.ontrack = (event: RTCTrackEvent) => {
+      const [stream] = event.streams;
+      streams.set(secret, stream);
+    };
+
+    const onMessage = (event: MessageEvent) => {
+      const data = JSON.parse(event.data);
+    };
+    connection.addEventListener('message', onMessage);
+    connections.set(secret, { connection, localConnection, token });
+    dispatch(connected(secret));
+  };
+};
+
+export const StreamAction = (chromeMediaSourceId: string, secret: string) => {
+  return async (dispatch: Dispatch) => {
+    if (!connections.has(secret)) {
+      console.error(`can't stream without a connection`);
+      return;
+    }
+
+    const { connection, localConnection } = connections.get(
+      secret
+    ) as Connection;
+
+    const stream = await navigator.mediaDevices.getUserMedia({
+      audio: false,
+      video: {
+        mandatory: {
+          chromeMediaSource: 'desktop',
+          chromeMediaSourceId,
+          minWidth: 1280,
+          maxWidth: 1280,
+          minHeight: 720,
+          maxHeight: 720,
+        },
+      } as any,
+    });
+    stream.getTracks().forEach(track => localConnection.addTrack(track));
+    call(connection, localConnection, secret);
   };
 };

@@ -16,7 +16,7 @@ import { RootState } from '../store';
 import { connectAction, hostAction } from '../store/actions/connect.actions';
 
 export default function Login() {
-  const { bg, color, border, primary } = useTheme();
+  const { border, primary } = useTheme();
   const dispatch = useDispatch();
   const [secret, setSecret] = useState('');
   const [password, setPassword] = useState('');
@@ -40,8 +40,6 @@ export default function Login() {
   return (
     <Box
       d="inline-flex"
-      bg={bg}
-      color={color}
       justifyContent="center"
       alignItems="center"
       flexDirection="column"

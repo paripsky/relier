@@ -1,5 +1,5 @@
 main {
-  height: calc(100vh - 96px);
+  height: calc(100vh - 64px);
 }
 
 header {
@@ -54,11 +54,11 @@ body {
   color: var(--primary-text-color);
 } */
 
-body,
+/* body,
 html,
 div,
 span,
 button,
 input {
   font-family: 'Oswald', sans-serif;
-}
+} */

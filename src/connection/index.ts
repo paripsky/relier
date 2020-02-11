@@ -6,29 +6,83 @@ export enum SocketMessageTypes {
   leave = 'leave',
 }
 
-export interface SocketMessage {
-  type: SocketMessageTypes;
-  payload?: MessagePayload;
-  to?: string;
-  from?: string;
-  secret?: string;
+export interface LoginMessageOut {
+  type: SocketMessageTypes.login;
+  secret: string;
+  password: string;
 }
 
-type MessagePayload = RTCIceCandidate | RTCSessionDescriptionInit;
+export interface OfferMessageOut {
+  type: SocketMessageTypes.offer;
+  offer: RTCSessionDescriptionInit;
+  token: string;
+}
 
-/**
- * send a message to a peer
- * @param {WebSocket} connection
- * @param {keyof SocketMessageTypes} message
- * @param {string} to
- */
-export const sendMessage = (connection: WebSocket, message: SocketMessage) => {
+export interface AnswerMessageOut {
+  type: SocketMessageTypes.answer;
+  answer: RTCSessionDescriptionInit;
+  token: string;
+}
+
+export interface CandidateMessageOut {
+  type: SocketMessageTypes.candidate;
+  candidate: RTCIceCandidate;
+  token: string;
+}
+
+export interface LeaveMessageOut {
+  type: SocketMessageTypes.leave;
+  token: string;
+}
+
+export type SocketMessageOut =
+  | LoginMessageOut
+  | OfferMessageOut
+  | AnswerMessageOut
+  | CandidateMessageOut
+  | LeaveMessageOut;
+
+export interface LoginMessageIn {
+  type: SocketMessageTypes.login;
+  error: string;
+  token: string;
+}
+
+export interface OfferMessageIn {
+  type: SocketMessageTypes.offer;
+  offer: RTCSessionDescription;
+}
+
+export interface AnswerMessageIn {
+  type: SocketMessageTypes.answer;
+  answer: RTCSessionDescription;
+}
+
+export interface CandidateMessageIn {
+  type: SocketMessageTypes.candidate;
+  candidate: RTCIceCandidateInit;
+}
+
+export interface LeaveMessageIn {
+  type: SocketMessageTypes.leave;
+}
+
+export type SocketMessageIn =
+  | LoginMessageIn
+  | OfferMessageIn
+  | AnswerMessageIn
+  | CandidateMessageIn
+  | LeaveMessageIn;
+
+export const sendMessage = (
+  connection: WebSocket,
+  message: SocketMessageOut
+) => {
   connection.send(JSON.stringify(message));
 };
 
 export const createLocalConnection = (
   connection: WebSocket,
-  onAddStream: any,
   secret: string
 ) => {
   //displaying local video stream on the page
@@ -43,25 +97,6 @@ export const createLocalConnection = (
 
   const localConnection = new RTCPeerConnection(configuration);
 
-  //when a remote user adds stream to the peer connection, we display it
-  if (onAddStream) {
-    localConnection.ontrack = (event: RTCTrackEvent) => {
-      const [stream] = event.streams;
-      onAddStream(stream, event);
-    };
-  }
-
-  // Setup ice handling
-  localConnection.onicecandidate = event => {
-    if (event.candidate) {
-      sendMessage(connection, {
-        type: SocketMessageTypes.candidate,
-        payload: event.candidate,
-        secret,
-      });
-    }
-  };
-
   return localConnection;
 };
 
@@ -74,13 +109,13 @@ export const createLocalConnection = (
 export const call = async (
   connection: WebSocket,
   localConnection: RTCPeerConnection,
-  secret: string
+  token: string
 ) => {
   const offer = await localConnection.createOffer();
   sendMessage(connection, {
     type: SocketMessageTypes.offer,
-    payload: offer,
-    secret,
+    offer,
+    token,
   });
 
   localConnection.setLocalDescription(offer);
@@ -97,7 +132,7 @@ export const handleOffer = async (
   connection: WebSocket,
   localConnection: RTCPeerConnection,
   offer: RTCSessionDescription,
-  from: string
+  token: string
 ) => {
   localConnection.setRemoteDescription(new RTCSessionDescription(offer));
 
@@ -106,8 +141,8 @@ export const handleOffer = async (
 
   sendMessage(connection, {
     type: SocketMessageTypes.answer,
-    payload: answer,
-    from,
+    answer,
+    token,
   });
 };
 
@@ -134,11 +169,11 @@ const handleLeave = (localConnection: RTCPeerConnection) => {
 export const hangUp = (
   connection: WebSocket,
   localConnection: RTCPeerConnection,
-  secret: string
+  token: string
 ) => {
   sendMessage(connection, {
     type: SocketMessageTypes.leave,
-    secret,
+    token,
   });
 
   handleLeave(localConnection);
@@ -147,25 +182,42 @@ export const hangUp = (
 const onMessage = (
   connection: WebSocket,
   localConnection: RTCPeerConnection,
-  onLogin: any
+  token: string
 ) => (message: MessageEvent) => {
   console.log('Got message', message.data);
-  const data = JSON.parse(message.data);
+  const data: SocketMessageIn = JSON.parse(message.data);
 
   switch (data.type) {
-    case 'login':
-      onLogin(data.id);
-      break;
-    //when somebody wants to call us
     case 'offer':
-      handleOffer(connection, localConnection, data.payload, data.id);
+      const { offer } = data;
+
+      if (!offer) {
+        console.error('offer message without offer');
+        return;
+      }
+
+      handleOffer(connection, localConnection, offer, token);
       break;
     case 'answer':
-      handleAnswer(localConnection, data.payload);
+      const { answer } = data;
+
+      if (!answer) {
+        console.error('answer message has no answer');
+        return;
+      }
+
+      handleAnswer(localConnection, answer);
       break;
     //when a remote peer sends an ice candidate to us
     case 'candidate':
-      handleCandidate(localConnection, data.payload);
+      const { candidate } = data;
+
+      if (!candidate) {
+        console.error('candidate message has no candidate');
+        return;
+      }
+
+      handleCandidate(localConnection, candidate);
       break;
     case 'leave':
       handleLeave(localConnection);
@@ -178,19 +230,41 @@ const onMessage = (
 export interface Connection {
   connection: WebSocket;
   localConnection: RTCPeerConnection;
+  token: string;
 }
 
 export const connect = (
   url: string,
-  onStream: any,
   secret: string,
-  { onLogin }: any
+  password: string
 ): Promise<Connection> => {
   return new Promise(resolve => {
     const connection = new WebSocket(url);
-    const localConnection = createLocalConnection(connection, onStream, secret);
-    connection.onmessage = onMessage(connection, localConnection, onLogin);
+    const localConnection = createLocalConnection(connection, secret);
     connection.onerror = console.error;
-    connection.onopen = () => resolve({ connection, localConnection });
+
+    const onLoginMessage = (message: MessageEvent) => {
+      const data: LoginMessageIn = JSON.parse(message.data);
+      const { token } = data;
+
+      if (!token) {
+        console.error("couldn't login");
+      }
+
+      connection.removeEventListener('message', onLoginMessage);
+      connection.addEventListener(
+        'message',
+        onMessage(connection, localConnection, token)
+      );
+      resolve({ connection, localConnection, token });
+    };
+
+    connection.onopen = () =>
+      sendMessage(connection, {
+        type: SocketMessageTypes.login,
+        secret,
+        password,
+      });
+    connection.addEventListener('message', onLoginMessage);
   });
 };

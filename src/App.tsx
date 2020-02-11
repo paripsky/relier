@@ -6,13 +6,14 @@ import { connectAction, hostAction } from './store/actions/connect.actions';
 import {
   Box,
   Flex,
-  Avatar,
+  Icon,
   Menu,
   MenuButton,
   MenuGroup,
   MenuDivider,
   MenuList,
   MenuItem,
+  Text,
 } from '@chakra-ui/core';
 import { RootState } from './store';
 import useTheme from './useTheme';
@@ -35,6 +36,10 @@ function App() {
     }
   });
 
+  const isLoggedIn = useSelector<RootState, boolean>(
+    state => state.connection.isLoggedIn
+  );
+
   // const isElectron = useSelector<RootState, boolean>(state => {
   //   return state.isElectron;
   // });
@@ -52,14 +57,16 @@ function App() {
   // };
 
   return (
-    <div className="App">
+    <Box className="App" fontFamily="Oswald">
       <header className="App-header">
-        <Box bg={primaryBg} color={color} w="100%" p={3}>
+        <Box bg={primaryBg} color={color} w="100%" p={2}>
           <Flex justify="space-between" alignItems="center">
-            <Box color="white">unelap</Box>
+            <Box color="white">
+              <Text>unelap</Text>
+            </Box>
             <Menu>
               <MenuButton as="div">
-                <Avatar size="md" />
+                <Icon name="settings" size="5" color="white" />
               </MenuButton>
               <MenuList minWidth="125px">
                 <MenuGroup title="Profile">
@@ -76,18 +83,18 @@ function App() {
         </Box>
       </header>
       <main>
-        <Flex h="full">
+        <Flex h="full" overflow="auto" bg={bg} color={color}>
           {/* <Sidebar /> */}
-          <Login />
-          <Host />
+          {!isLoggedIn && <Login />}
+          {isLoggedIn && <Host />}
         </Flex>
       </main>
       <footer>
         <Box bg={bg} color={color}>
-          unelap &copy; 2020
+          <Text>unelap &copy; 2020</Text>
         </Box>
       </footer>
-    </div>
+    </Box>
   );
 }
 
