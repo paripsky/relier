@@ -63,14 +63,8 @@ export const connectAction = (secret: string, password: string) => {
     );
 
     localConnection.ontrack = (event: RTCTrackEvent) => {
-      const track = event.track;
       const [stream] = event.streams;
       streams.set(secret, stream);
-      dispatch(recieving(secret));
-    };
-
-    (localConnection as any).onaddstream = (e: any) => {
-      streams.set(secret, e.stream);
       dispatch(recieving(secret));
     };
 
@@ -108,10 +102,9 @@ export const StreamAction = (chromeMediaSourceId: string, secret: string) => {
       } as any,
     });
     streams.set(secret, stream);
-    // stream
-    //   .getTracks()
-    //   .forEach(track => localConnection.addTrack(track, stream));
-    (localConnection as any).addStream(stream);
+    stream
+      .getTracks()
+      .forEach(track => localConnection.addTrack(track, stream));
     call(connection, localConnection, token);
     dispatch(streaming(secret));
   };
