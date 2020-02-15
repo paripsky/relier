@@ -112,13 +112,12 @@ export const call = async (
   token: string
 ) => {
   const offer = await localConnection.createOffer();
+  await localConnection.setLocalDescription(offer);
   sendMessage(connection, {
     type: SocketMessageTypes.offer,
     offer,
     token,
   });
-
-  localConnection.setLocalDescription(offer);
 };
 
 /**
@@ -134,10 +133,10 @@ export const handleOffer = async (
   offer: RTCSessionDescription,
   token: string
 ) => {
-  localConnection.setRemoteDescription(new RTCSessionDescription(offer));
+  await localConnection.setRemoteDescription(offer);
 
   const answer = await localConnection.createAnswer();
-  localConnection.setLocalDescription(answer);
+  await localConnection.setLocalDescription(answer);
 
   sendMessage(connection, {
     type: SocketMessageTypes.answer,
@@ -150,7 +149,7 @@ const handleAnswer = (
   localConnection: RTCPeerConnection,
   answer: RTCSessionDescription
 ) => {
-  localConnection.setRemoteDescription(new RTCSessionDescription(answer));
+  localConnection.setRemoteDescription(answer);
 };
 
 const handleCandidate = (
@@ -256,6 +255,16 @@ export const connect = (
         'message',
         onMessage(connection, localConnection, token)
       );
+
+      localConnection.onicecandidate = event => {
+        if (event.candidate) {
+          sendMessage(connection, {
+            type: SocketMessageTypes.candidate,
+            candidate: event.candidate,
+            token,
+          });
+        }
+      };
       resolve({ connection, localConnection, token });
     };
 

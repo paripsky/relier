@@ -30,7 +30,7 @@ export default function Login() {
   });
 
   const connect = () => {
-    dispatch(connectAction(secret, ''));
+    dispatch(connectAction(secret, password));
   };
 
   const host = () => {
@@ -104,7 +104,6 @@ export default function Login() {
           </Button>
         </FormControl>
       </Box>
-      {/* <video ref={remoteStream} autoPlay /> */}
     </Box>
   );
 }

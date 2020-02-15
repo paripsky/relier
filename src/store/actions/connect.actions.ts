@@ -13,6 +13,7 @@ import {
 } from '../../connection';
 import { DesktopCapturer } from 'electron';
 import { Dispatch } from 'redux';
+import streams from '../streams';
 
 const electron = window.require && window.require('electron');
 const desktopCapturer: DesktopCapturer = electron && electron.desktopCapturer;
@@ -25,11 +26,13 @@ export const connected = (secret: string) => ({
   type: CONNECTED,
   secret,
 });
-export const streaming = (id: string) => ({ type: STREAMING, streamId: id });
-export const recieving = (id: string) => ({ type: RECIEVING, streamId: id });
+export const streaming = (streamId: string) => ({
+  type: STREAMING,
+  streamId,
+});
+export const recieving = (streamId: string) => ({ type: RECIEVING, streamId });
 
 const connections = new Map<string, Connection>();
-const streams = new Map<string, MediaStream>();
 
 export const hostAction = (secret: string, password: string) => {
   return async (dispatch: Dispatch) => {
@@ -60,8 +63,15 @@ export const connectAction = (secret: string, password: string) => {
     );
 
     localConnection.ontrack = (event: RTCTrackEvent) => {
+      const track = event.track;
       const [stream] = event.streams;
       streams.set(secret, stream);
+      dispatch(recieving(secret));
+    };
+
+    (localConnection as any).onaddstream = (e: any) => {
+      streams.set(secret, e.stream);
+      dispatch(recieving(secret));
     };
 
     const onMessage = (event: MessageEvent) => {
@@ -80,7 +90,7 @@ export const StreamAction = (chromeMediaSourceId: string, secret: string) => {
       return;
     }
 
-    const { connection, localConnection } = connections.get(
+    const { connection, localConnection, token } = connections.get(
       secret
     ) as Connection;
 
@@ -97,7 +107,12 @@ export const StreamAction = (chromeMediaSourceId: string, secret: string) => {
         },
       } as any,
     });
-    stream.getTracks().forEach(track => localConnection.addTrack(track));
-    call(connection, localConnection, secret);
+    streams.set(secret, stream);
+    // stream
+    //   .getTracks()
+    //   .forEach(track => localConnection.addTrack(track, stream));
+    (localConnection as any).addStream(stream);
+    call(connection, localConnection, token);
+    dispatch(streaming(secret));
   };
 };

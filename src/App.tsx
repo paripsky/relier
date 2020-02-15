@@ -1,7 +1,6 @@
 import React, { useRef } from 'react';
 import './App.css';
 import { useDispatch, useSelector } from 'react-redux';
-import { connectAction, hostAction } from './store/actions/connect.actions';
 
 import {
   Box,
@@ -20,41 +19,18 @@ import useTheme from './useTheme';
 import Login from './pages/Login';
 import Sidebar from './layouts/Sidebar';
 import Host from './pages/Host';
+import Streaming from './pages/Streaming';
 
 function App() {
-  const dispatch = useDispatch();
-  const remoteStream = useRef<HTMLVideoElement>(null);
   const { bg, color, toggleTheme, primaryBg } = useTheme();
-
-  const stream = useSelector<RootState, MediaStream>(state => {
-    if (state.connection.streamId) {
-      const streamId = state.connection.streamId;
-      const stream = (window as any)['streams'][streamId];
-      console.log(remoteStream.current, stream);
-
-      return stream;
-    }
-  });
 
   const isLoggedIn = useSelector<RootState, boolean>(
     state => state.connection.isLoggedIn
   );
 
-  // const isElectron = useSelector<RootState, boolean>(state => {
-  //   return state.isElectron;
-  // });
-
-  // if (stream && remoteStream.current) {
-  //   remoteStream.current.srcObject = stream;
-  // }
-
-  // const connect = () => {
-  //   dispatch(connectAction(secret, ''));
-  // };
-
-  // const host = () => {
-  //   dispatch(hostAction(secret));
-  // };
+  const isRecieving = useSelector<RootState, boolean>(state => {
+    return !!state.connection.streamId;
+  });
 
   return (
     <Box className="App" fontFamily="Oswald">
@@ -86,7 +62,8 @@ function App() {
         <Flex h="full" overflow="auto" bg={bg} color={color}>
           {/* <Sidebar /> */}
           {!isLoggedIn && <Login />}
-          {isLoggedIn && <Host />}
+          {isLoggedIn && !isRecieving && <Host />}
+          {isLoggedIn && isRecieving && <Streaming />}
         </Flex>
       </main>
       <footer>
