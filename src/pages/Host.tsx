@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { DesktopCapturer, DesktopCapturerSource } from 'electron';
 import { PseudoBox, Box, Text, Button } from '@chakra-ui/core';
 import { useDispatch, useSelector } from 'react-redux';
-import { StreamAction } from '../store/actions/connect.actions';
+import { streamAction } from '../store/actions/connect.actions';
 import { RootState } from '../store';
 import useTheme from '../useTheme';
 
@@ -58,7 +58,7 @@ export default function Host() {
   }, []);
 
   const stream = () => {
-    selectedMediaId && dispatch(StreamAction(selectedMediaId, secret));
+    selectedMediaId && dispatch(streamAction(selectedMediaId, secret));
   };
 
   return (

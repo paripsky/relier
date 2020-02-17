@@ -9,11 +9,13 @@ import {
   call,
   sendMessage,
   SocketMessageTypes,
-  Connection,
 } from '../../connection';
 import { DesktopCapturer } from 'electron';
 import { Dispatch } from 'redux';
-import streams from '../streams';
+import streams from '../../connection/streams';
+import connections from '../../connection/connections';
+import Connection from '../../models/Connection';
+import dataChannels from '../../connection/dataChannels';
 
 const electron = window.require && window.require('electron');
 const desktopCapturer: DesktopCapturer = electron && electron.desktopCapturer;
@@ -32,8 +34,6 @@ export const streaming = (streamId: string) => ({
 });
 export const recieving = (streamId: string) => ({ type: RECIEVING, streamId });
 
-const connections = new Map<string, Connection>();
-
 export const hostAction = (secret: string, password: string) => {
   return async (dispatch: Dispatch) => {
     dispatch(startConnecting(secret));
@@ -48,6 +48,20 @@ export const hostAction = (secret: string, password: string) => {
     };
     connection.addEventListener('message', onMessage);
     connections.set(secret, { connection, localConnection, token });
+    const dc = localConnection.createDataChannel('events');
+
+    dc.onmessage = function(event) {
+      console.log('received: ' + event.data);
+    };
+
+    dc.onopen = function() {
+      console.log('datachannel open');
+      dataChannels.set(secret, dc);
+    };
+
+    dc.onclose = function() {
+      console.log('datachannel close');
+    };
 
     dispatch(connected(secret));
   };
@@ -73,11 +87,29 @@ export const connectAction = (secret: string, password: string) => {
     };
     connection.addEventListener('message', onMessage);
     connections.set(secret, { connection, localConnection, token });
+    localConnection.ondatachannel = event => {
+      const { channel: dataChannel } = event;
+
+      dataChannel.onmessage = function(event) {
+        console.log('received: ' + event.data);
+      };
+
+      dataChannel.onopen = function() {
+        console.log('datachannel open');
+      };
+
+      dataChannel.onclose = function() {
+        console.log('datachannel close');
+      };
+
+      dataChannels.set(secret, dataChannel);
+    };
+
     dispatch(connected(secret));
   };
 };
 
-export const StreamAction = (chromeMediaSourceId: string, secret: string) => {
+export const streamAction = (chromeMediaSourceId: string, secret: string) => {
   return async (dispatch: Dispatch) => {
     if (!connections.has(secret)) {
       console.error(`can't stream without a connection`);

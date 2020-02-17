@@ -46,6 +46,24 @@ export const streamId = (state = null, { type, streamId }) => {
   }
 };
 
+export const isStreaming = (state = false, { type }) => {
+  switch (type) {
+    case STREAMING:
+      return true;
+    default:
+      return state;
+  }
+};
+
+export const isReceiving = (state = false, { type }) => {
+  switch (type) {
+    case RECIEVING:
+      return true;
+    default:
+      return state;
+  }
+};
+
 export const secret = (state = null, { type, secret }) => {
   switch (type) {
     case CONNECTED:
@@ -61,4 +79,6 @@ export default combineReducers({
   streamId,
   isLoggedIn,
   secret,
+  isStreaming,
+  isReceiving,
 });

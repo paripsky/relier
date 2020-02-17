@@ -1,3 +1,5 @@
+import Connection from '../models/Connection';
+
 export enum SocketMessageTypes {
   login = 'login',
   offer = 'offer',
@@ -225,12 +227,6 @@ const onMessage = (
       break;
   }
 };
-
-export interface Connection {
-  connection: WebSocket;
-  localConnection: RTCPeerConnection;
-  token: string;
-}
 
 export const connect = (
   url: string,
