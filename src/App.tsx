@@ -1,6 +1,6 @@
-import React, { useRef } from 'react';
+import React from 'react';
 import './App.css';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 
 import {
   Box,
@@ -17,7 +17,6 @@ import {
 import { RootState } from './store';
 import useTheme from './useTheme';
 import Login from './pages/Login';
-import Sidebar from './layouts/Sidebar';
 import Host from './pages/Host';
 import Streaming from './pages/Streaming';
 

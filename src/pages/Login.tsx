@@ -1,14 +1,5 @@
-import React, { ChangeEvent, useEffect, useState } from 'react';
-import {
-  FormHelperText,
-  Icon,
-  Box,
-  Flex,
-  FormLabel,
-  FormControl,
-  Text,
-  Input,
-} from '@chakra-ui/core';
+import React, { ChangeEvent, useState } from 'react';
+import { FormHelperText, Box, FormControl, Text, Input } from '@chakra-ui/core';
 import { Button } from '@chakra-ui/core/dist';
 import useTheme from '../useTheme';
 import { useSelector, useDispatch } from 'react-redux';
@@ -18,12 +9,8 @@ import { connectAction, hostAction } from '../store/actions/connect.actions';
 export default function Login() {
   const { border, primary } = useTheme();
   const dispatch = useDispatch();
-  const [secret, setSecret] = useState('');
+  const [secret, setSecret] = useState(`secret${Math.random() * 100}`);
   const [password, setPassword] = useState('');
-
-  useEffect(() => {
-    setSecret(`secret${Math.random() * 100}`);
-  }, []);
 
   const isElectron = useSelector<RootState, boolean>(state => {
     return state.isElectron;

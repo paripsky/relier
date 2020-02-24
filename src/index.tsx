@@ -39,3 +39,11 @@ ReactDOM.render(
 // unregister() to register() below. Note this comes with some pitfalls.
 // Learn more about service workers: https://bit.ly/CRA-PWA
 serviceWorker.unregister();
+
+// @ts-ignore
+if (module?.hot) {
+  // @ts-ignore
+  module.hot.accept();
+}
+
+window.onerror = console.error;

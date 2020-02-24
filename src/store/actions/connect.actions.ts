@@ -4,21 +4,12 @@ import {
   STREAMING,
   RECIEVING,
 } from './connect.types';
-import {
-  connect as connectToSocket,
-  call,
-  sendMessage,
-  SocketMessageTypes,
-} from '../../connection';
-import { DesktopCapturer } from 'electron';
+import { connect as connectToSocket, call } from '../../connection';
 import { Dispatch } from 'redux';
 import streams from '../../connection/streams';
 import connections from '../../connection/connections';
 import Connection from '../../models/Connection';
 import dataChannels from '../../connection/dataChannels';
-
-const electron = window.require && window.require('electron');
-const desktopCapturer: DesktopCapturer = electron && electron.desktopCapturer;
 
 export const startConnecting = (secret: string) => ({
   type: START_CONNECTING,
@@ -43,10 +34,6 @@ export const hostAction = (secret: string, password: string) => {
       password
     );
 
-    const onMessage = (event: MessageEvent) => {
-      const data = JSON.parse(event.data);
-    };
-    connection.addEventListener('message', onMessage);
     connections.set(secret, { connection, localConnection, token });
     const dc = localConnection.createDataChannel('events');
 
@@ -82,10 +69,6 @@ export const connectAction = (secret: string, password: string) => {
       dispatch(recieving(secret));
     };
 
-    const onMessage = (event: MessageEvent) => {
-      const data = JSON.parse(event.data);
-    };
-    connection.addEventListener('message', onMessage);
     connections.set(secret, { connection, localConnection, token });
     localConnection.ondatachannel = event => {
       const { channel: dataChannel } = event;
