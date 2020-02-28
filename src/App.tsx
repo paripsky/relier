@@ -32,18 +32,25 @@ function App() {
   });
 
   return (
-    <Box className="App" fontFamily="Oswald">
+    <Flex
+      direction="column"
+      className="App"
+      fontFamily="Open Sans"
+      bg={bg}
+      color={color}
+      h="100vh"
+    >
       <header className="App-header">
-        <Box bg={primaryBg} color={color} w="100%" p={2}>
+        <Box w="100%" p={2}>
           <Flex justify="space-between" alignItems="center">
-            <Box color="white">
+            <Box>
               <Text>unelap</Text>
             </Box>
             <Menu>
               <MenuButton as="div">
-                <Icon name="settings" size="5" color="white" />
+                <Icon name="settings" size="5" />
               </MenuButton>
-              <MenuList minWidth="125px">
+              <MenuList minWidth="125px" borderWidth={0}>
                 <MenuGroup title="Profile">
                   <MenuItem>Login</MenuItem>
                   <MenuItem>My Account</MenuItem>
@@ -58,7 +65,7 @@ function App() {
         </Box>
       </header>
       <main>
-        <Flex h="full" overflow="auto" bg={bg} color={color}>
+        <Flex h="full" overflow="auto">
           {/* <Sidebar /> */}
           {!isLoggedIn && <Login />}
           {isLoggedIn && !isRecieving && <Host />}
@@ -66,11 +73,11 @@ function App() {
         </Flex>
       </main>
       <footer>
-        <Box bg={bg} color={color}>
-          <Text>unelap &copy; 2020</Text>
-        </Box>
+        <Flex bg={bg} color={color} justify="center">
+          <Text fontSize="xs">unelap &copy; 2020</Text>
+        </Flex>
       </footer>
-    </Box>
+    </Flex>
   );
 }
 

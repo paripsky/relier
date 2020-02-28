@@ -34,14 +34,12 @@ export default function Login() {
     >
       <Box
         as="form"
-        maxW="lg"
         borderColor={border}
-        borderWidth="1px"
-        padding={10}
+        borderWidth={1}
+        padding={8}
+        minWidth="sm"
       >
-        <Text fontSize="xl">
-          Connection Secret - running in {isElectron ? 'Electron' : 'Browser'}
-        </Text>
+        <Text fontSize="xl">Login</Text>
         <FormControl>
           <FormHelperText id="connection-secret-helper-text">
             Secret:
@@ -73,19 +71,20 @@ export default function Login() {
         <FormControl marginTop={5} d="flex" justifyContent="flex-end">
           {isElectron && (
             <Button
-              marginLeft={1}
               variant="outline"
               variantColor={primary}
               onClick={host}
+              flex={1}
+              mr={1}
             >
               Host
             </Button>
           )}
           <Button
-            marginLeft={1}
             variant="solid"
             variantColor={primary}
             onClick={connect}
+            flex={1}
           >
             Connect
           </Button>

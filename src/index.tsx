@@ -17,9 +17,9 @@ document.title = 'unelap';
 const theme = {
   ...ChakraTheme,
   fonts: {
-    body: 'Oswald',
-    heading: 'Oswald',
-    mono: 'Oswald',
+    body: 'Open Sans',
+    heading: 'Open Sans',
+    mono: 'Open Sans',
   },
 };
 
