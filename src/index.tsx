@@ -12,7 +12,7 @@ import {
   theme as ChakraTheme,
 } from '@chakra-ui/core';
 
-document.title = 'unelap';
+document.title = 'relier';
 
 const theme = {
   ...ChakraTheme,

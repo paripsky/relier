@@ -44,7 +44,7 @@ function App() {
         <Box w="100%" p={2}>
           <Flex justify="space-between" alignItems="center">
             <Box>
-              <Text>unelap</Text>
+              <Text>relier</Text>
             </Box>
             <Menu>
               <MenuButton as="div">
@@ -74,7 +74,7 @@ function App() {
       </main>
       <footer>
         <Flex bg={bg} color={color} justify="center">
-          <Text fontSize="xs">unelap &copy; 2020</Text>
+          <Text fontSize="xs">relier &copy; 2020</Text>
         </Flex>
       </footer>
     </Flex>
