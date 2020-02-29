@@ -32,13 +32,7 @@ export default function Login() {
       flexDirection="column"
       flex="1"
     >
-      <Box
-        as="form"
-        borderColor={border}
-        borderWidth={1}
-        padding={8}
-        minWidth="sm"
-      >
+      <Box as="form" borderColor={border} padding={8} minWidth="sm">
         <Text fontSize="xl">Login</Text>
         <FormControl>
           <FormHelperText id="connection-secret-helper-text">

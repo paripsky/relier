@@ -69,12 +69,13 @@ export default function Host() {
           Next
         </Button>
       </Box>
-      <Box overflow="auto">
+      <Box overflow="auto" height="calc(100vh - 120px)">
         <Box>
           <Text fontSize="xl">Screens</Text>
           <Box d="flex">
             {screens.map(screen => (
               <Source
+                key={screen.id}
                 source={screen}
                 onClick={setSelectedMediaId}
                 isSelected={screen.id === selectedMediaId}
@@ -87,6 +88,7 @@ export default function Host() {
           <Box d="flex" flexWrap="wrap">
             {windows.map(window => (
               <Source
+                key={window.id}
                 source={window}
                 onClick={setSelectedMediaId}
                 isSelected={window.id === selectedMediaId}
