@@ -1,7 +1,7 @@
 {
   "name": "relier",
-  "version": "1.0.0",
-  "description": "remote desktop",
+  "version": "0.0.1",
+  "description": "relier is a remote desktop app",
   "main": "main.js",
   "scripts": {
     "electron": "electron .",
